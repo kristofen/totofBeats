@@ -10,4 +10,7 @@ This project is made of 2 modules :
   controls audio engine via bluetooth serial connection
 
 Current Status: prototype
+this is not working for now, I have some work to do before having a first version working.
+
+
 
