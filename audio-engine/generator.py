@@ -12,7 +12,9 @@
 import numpy as np
 from mixer import *
 from waveloader import *
+from library import *
 import math
+import thread
 
 # Generator: container for audio tracks to play
 class Generator(object):
@@ -23,30 +25,37 @@ class Generator(object):
 
     def __init__(self,sampleRate,nbChannels,nbTracks):
         # constructor
+        self.library = Library('C:\\Users\\Christophe\\Documents\\Drum Samples\\')
+        self.isOn=False
         self.bpm = 120.
         self.ptr=int(0)
+        self.ptrLock = thread.allocate_lock
         self.nbticks = 16 # number of ticks
         self.ticksperbeat = 4 # number of ticks per beat
         self.sampleRate = sampleRate # sample frequency
         self.nbChannels = nbChannels # nb output channel to generate
         self.tracks = [] # allocates array of tracks
         for i in range(nbTracks):
-            wl = None
-            if i==0:
-##                wl=FakeWaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
-                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Bassdrum-01.wav')
-                wl.open()
-            elif i==1:
+            self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,None,i)) # allocates each track individually
+
+##        for i in range(nbTracks):
+##            wl = None
+##            if i==0:
+####                wl=FakeWaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
+##                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Bassdrum-01.wav')
+##                wl.open()
+##            elif i==1:
+####                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
 ##                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
-                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
-                wl.open()
-            elif i==2:
-##                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
-                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Hat Closed.wav')
-                wl.open()
-            if wl is not None:
-                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,wl,i)) # allocates each track individually
+##                wl.open()
+##            elif i==2:
+####                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
+##                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Hat Closed.wav')
+##                wl.open()
+##            if wl is not None:
+##                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,wl,i)) # allocates each track individually
         self.bufferdepth=GeneratorTrack.getBufferDepth(self.nbticks,self.ticksperbeat,self.bpm,self.sampleRate)
+
     def changeBpm(self,bpm):
         for i,value in enumerate(self.tracks):
             value.changeBpm(bpm)
@@ -54,7 +63,9 @@ class Generator(object):
     def needSamples(self,nbsamples,time):
         # function called by audio mixer,
         # this function may return the nb of sample desired
-        # TODO
+
+        if self.isOn==False:
+            return None
 
         if Generator.trace==True:
             print "nbsamples=",nbsamples," ptr=",self.ptr," bufferdepth=",self.bufferdepth
@@ -62,16 +73,9 @@ class Generator(object):
         nb=0
         for i,v in enumerate(self.tracks):
             ret = v.needSample(nbsamples,self.ptr)
-##            if Generator.trace:
-##                if ret is None:
-##                    print "i=",i," none"
-##                else:
-##                    print "i=",i," min=",np.min(ret)," max=",np.max(ret)," ptr=",self.ptr," nbsamples=",nbsamples
 
             if ret is not None:
                 nb+=1
-##                if Generator.counter<5:
-##                    print "min=",np.min(ret)," max=",np.max(ret)
                 if outp is None:
                     outp=ret
                 else:
@@ -79,21 +83,80 @@ class Generator(object):
 
         if nb>1:
             outp = outp/nb
-        if(self.ptr+nbsamples)>self.bufferdepth:
-            self.ptr = nbsamples-(self.bufferdepth-self.ptr) # updates pointer
-        else:
-            self.ptr += nbsamples
 
-
-##        if Generator.counter<5:
-##            print "needSamples nbsamples=",nbsamples
-##            print "ptr=",self.ptr," bufferdepth=",self.bufferdepth
-##            print "a1=",a1," a2=",a2
-##            Generator.counter+=1
-
+        # UPDATE read ptr (must lock for eventual updates)
+        with self.ptrLock:
+            if(self.ptr+nbsamples)>self.bufferdepth:
+                self.ptr = nbsamples-(self.bufferdepth-self.ptr) # updates pointer
+            else:
+                self.ptr += nbsamples
 
         return outp
 
+## #######################################################
+## Generator commands
+
+    def start(self):
+        if self.isOn==False:
+            self.cue(0)
+            self.isOn=True
+
+    def stop(self):
+        self.isOn=False
+
+    def pause(self):
+        self.isOn=False
+
+    def cue(self,tickptr):
+        # moves play pointer to tickPtr
+        # tickptr is expressed in ticks unit. ie: in the interval [0,(nbbeats*ticksperbeats)-1]
+        # !!! self.ptr is expressed in sample unit. So we need to convert tickptr
+        with self.ptrLock:    # we lock while updating ptr
+            self.ptr = int( float(self.bufferdepth) *  float(tickptr)/float(self.nbticks))
+
+    def gridWidth(self,pBeats,pTicksPerBeat):
+        # modifies grid width in ticks
+        # pBeats (int) nb beats in the width
+        # pTicksPerBeat (int) nb ticks per beat
+        if self.isOn==False:
+            self.nbticks = pBeats*pTicksPerBeat
+            self.ticksperbeat = pTicksPerBeat
+            for k,v in self.tracks:
+                v.nbticks=self.nbticks #change number of ticks
+                v.ticksperpbeat=self.ticksperbeat # change number of ticks per beat
+                v.allocateTicks() # re-generate array of ticks (on/off)
+                v.allocateBuffer() # re-allocate buffer of audio samples
+                v.updateMaster()
+
+    def gridHeight(self,nb):
+        # args int nb of tracks to allocate
+        if self.isOn==False:
+            diff = nb - self.tracks
+            if diff!=0:
+                for i in range(abs(diff)):
+                    if diff < 0:
+                        self.tracks.pop()
+                    elif diff >0:
+                        self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,None,len(self.tracks)))
+
+    def gridAddRow(self,pFile):
+        if self.isOn==False:
+            wl = None
+            if pFile is not None:
+                wl=WaveLoader(self.library.getPath(pFile))
+                wl.open()
+            self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,wl,len(self.tracks)))
+
+    def gridRow(self,trackIndex,pFile):
+        if trackIndex>=0 and trackIndex<len(self.tracks):
+            wl=None
+            if pFile is not None:
+                wl=WaveLoader(self.library.getPath(pFile))
+                wl.open()
+            self.tracks[trackIndex].registerWave(wl)
+
+    def gridCell(self,indexTrack,indexTick,tickState):
+        ###
 
 class GeneratorTrack(object):
     """GeneratorTrack"""
@@ -101,39 +164,43 @@ class GeneratorTrack(object):
 
     def __init__(self,nbticks,ticksperbeat,bpm,wl,i):
         self.nbticks = nbticks  # total ticks on the track
-        self.ticksperbeat=ticksperbeat # nb ticks per beat
+        self.ticksperbeat=ticksperbeat # nb ticks per beat (<== not used ?)
+        self.allocateTicks() # allocates ticks array
         self.bpm=bpm #curBpm
-        self.ticks = np.zeros((self.nbticks,),dtype=np.bool) #init ticks (booleans true=> ticks on false => ticks off)
         self.wl = wl #references waveloader
         self.master=None # master track (is read directly from generator)
         self.i=i
-        if i==0:
-            self.changeTick(0,False)
-##            self.changeTick(2,True)
-##            self.changeTick(4,True)
-##            self.changeTick(8,True)
-##            self.changeTick(12,True)
-        elif i==1:
+##        if i==0:
 ##            self.changeTick(0,False)
-            self.changeTick(0,False)
-##            self.changeTick(4,True)
-##            self.changeTick(8,False)
-##            self.changeTick(12,True)
-##            self.changeTick(15,True)
-        elif i==2:
+####            self.changeTick(2,True)
+####            self.changeTick(4,True)
+####            self.changeTick(8,True)
+####            self.changeTick(12,True)
+##        elif i==1:
+####            self.changeTick(0,False)
 ##            self.changeTick(0,False)
-            self.changeTick(0,False)
-##            self.changeTick(2,True)
-##            self.changeTick(4,True)
-##            self.changeTick(6,True)
-##            self.changeTick(8,False)
-##            self.changeTick(10,True)
-##            self.changeTick(12,True)
-##            self.changeTick(14,True)
+####            self.changeTick(4,True)
+####            self.changeTick(8,False)
+####            self.changeTick(12,True)
+####            self.changeTick(15,True)
+##        elif i==2:
+####            self.changeTick(0,False)
+##            self.changeTick(0,False)
+####            self.changeTick(2,True)
+####            self.changeTick(4,True)
+####            self.changeTick(6,True)
+####            self.changeTick(8,False)
+####            self.changeTick(10,True)
+####            self.changeTick(12,True)
+####            self.changeTick(14,True)
 ##
         self.allocateBuffer()
         self.refreshTrack()
         self.updateMaster()
+
+    def allocateTicks(self):
+        # creates array of ticks
+        self.ticks = np.zeros((self.nbticks,),dtype=np.bool) #init ticks (booleans true=> ticks on false => ticks off)
 
     def registerWave(self,wl):
         self.wl=wl
@@ -191,8 +258,6 @@ class GeneratorTrack(object):
 ##        print "i=",self.i," update master with min=",np.min(self.buffer)," max=",np.max(self.buffer)
         self.master=self.buffer
 
-        #nbsamples =
-        # todo generate channels according to nbseconds*samlingrate
 
     def needSample(self,nbsamples,ptr):
         # returns nbsamples from master
