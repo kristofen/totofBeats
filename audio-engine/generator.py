@@ -156,7 +156,9 @@ class Generator(object):
             self.tracks[trackIndex].registerWave(wl)
 
     def gridCell(self,indexTrack,indexTick,tickState):
-        ###
+        ### tickState bool
+        if indexTrack>=0 and indexTrack<len(self.tracks):
+            self.tracks[indexTrack].changeTick(indexTick,tickState)
 
 class GeneratorTrack(object):
     """GeneratorTrack"""
