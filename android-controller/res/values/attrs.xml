@@ -1,0 +1,5 @@
+<resources>
+	<declare-styleable name="TickButton">
+		<attr name="isOn" format="boolean" />
+	</declare-styleable>
+</resources>

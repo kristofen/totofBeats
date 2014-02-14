@@ -1,44 +1,51 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<GridLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.example.testbluetooth"
+     
+    xmlns:tools="http://schemas.android.com/tools" 
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:rowCount="9"
+    android:columnCount="17" 
+    android:id="@+id/grid1"
     
-	<LinearLayout  
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:paddingLeft="16dp"
-	    android:paddingRight="16dp"
-	    android:orientation="vertical" >
-	    
-	    <Button
-	        android:id="@+id/btn1"
-			android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"	        
-	        android:text="@string/btn1text"
-	        android:onClick="btn1click" />
-	    
-	    <EditText
-		    android:id="@+id/txtInput"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:inputType="text" />
-	    
-        <Button
-	        android:id="@+id/btn2"
-			android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"	 	        
-	        android:text="@string/btn2text"
-	        android:onClick="btn2click" />	    
-	    
-	    <TextView android:id="@+id/txtResult"
-        	android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-	        />
-	    
+     >
+	<LinearLayout 
+	    android:layout_row="0"
+	    android:layout_column="1"
+	    android:layout_columnSpan="16"
+	    android:orientation="horizontal"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    >
+	   	    <Button
+		        android:id="@+id/btn1"
+		        android:text="@string/btn1text"
+		        android:onClick="btn1click"
+		        android:layout_width="wrap_content" 
+		        android:layout_height="wrap_content"
+		         />
+  	    
+		    <EditText
+			    android:id="@+id/txtInput"
+			    android:inputType="text"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			     />    
+	        
+	        <Button
+		        android:id="@+id/btn2"
+		        android:text="@string/btn2text"
+		        android:onClick="btn2click"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		         />
+	        
+			<TextView android:id="@+id/txtResult"
+			    android:layout_width="wrap_content" 
+			    android:layout_height="wrap_content"
+		        />
+		
 	</LinearLayout>
-	
 
-
-
-
-</RelativeLayout>
+            	    
+</GridLayout>

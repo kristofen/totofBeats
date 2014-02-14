@@ -6,10 +6,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.TextView;
 import android.support.v4.app.NavUtils;
 
@@ -19,8 +23,8 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
-        
+        this.baseGrid = (GridLayout) findViewById(R.id.grid1);
+        createGrid();
     }
 
     @Override
@@ -29,6 +33,31 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    private void createGrid(){
+    	for (int i=0;i<8;i++){
+    		for (int j=0;j<16;j++){
+	    		//Button newbtn = new Button(this);
+    			TickButton newbtn = new TickButton(this);
+	    		//newbtn.setText("a"+i+"_"+j);
+	    		newbtn.setId((i*100)+j);
+	    		GridLayout.LayoutParams param =new GridLayout.LayoutParams();
+	            param.height = LayoutParams.WRAP_CONTENT;
+	            param.width = LayoutParams.WRAP_CONTENT;
+	            //param.rightMargin = 5;
+	            //param.topMargin = 5;
+	            param.setGravity(Gravity.CENTER);
+	            param.columnSpec = GridLayout.spec(j+1);
+	            param.rowSpec = GridLayout.spec(i+1);
+	    		newbtn.setLayoutParams(param);
+	    		this.baseGrid.addView(newbtn); 
+	    		
+	    		
+    		}    		
+    	}
+    }
+    
+    private GridLayout baseGrid = null;
+    
     static final int REQUEST_ENABLE_BT = 1;
     
 	private btManager mgr = null;
