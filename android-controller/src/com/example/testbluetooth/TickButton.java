@@ -25,6 +25,7 @@ public class TickButton extends View {
 	}
 	public void setIsOn(boolean value) {
 	   pIsOn = value;
+	   refreshColor();
 	   invalidate();
 	   requestLayout();
 	}
@@ -48,8 +49,15 @@ public class TickButton extends View {
 	
 	private void init(){
 		this.backPaint = new Paint(0);
-		this.backPaint.setColor(0xffff0000);
-
+		refreshColor();
+	}
+	
+	private void refreshColor(){
+		if (this.pIsOn==true){
+			this.backPaint.setColor(0xff00ff00);
+		} else {
+			this.backPaint.setColor(0xffff0000);
+		}
 	}
 	
 	private int pW=0;
@@ -59,11 +67,21 @@ public class TickButton extends View {
 	@Override
 	protected void onSizeChanged (int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
+		
 		this.pW=w;
 		this.pH=h;
+		
+		this.maxW = Math.max(this.maxW, this.pW);
+		this.maxH = Math.max(this.maxH, this.pH);
+		this.minW = Math.min(this.minW, this.pW);
+		this.minH = Math.min(this.minH, this.pH);
+		
 		this.bounds=new RectF(0,0,this.pW,this.pH);
 	}
-	
+	private int minW;
+	private int maxW;
+	private int minH;
+	private int maxH;	
 	protected void onDraw(Canvas canvas){
 		//super.onDraw(canvas);
 		if (this.bounds!=null && this.backPaint!=null){
