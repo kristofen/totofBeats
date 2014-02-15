@@ -16,11 +16,12 @@
 	    android:orientation="horizontal"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
+	    android:id="@+id/linLayout1"
 	    >
 	   	    <Button
 		        android:id="@+id/btn1"
 		        android:text="@string/btn1text"
-		        android:onClick="btn1click"
+		        android:onClick="btnBluetoothEnabledClick"
 		        android:layout_width="wrap_content" 
 		        android:layout_height="wrap_content"
 		         />
@@ -35,7 +36,7 @@
 	        <Button
 		        android:id="@+id/btn2"
 		        android:text="@string/btn2text"
-		        android:onClick="btn2click"
+		        android:onClick="btnSendBluetoothClick"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		         />

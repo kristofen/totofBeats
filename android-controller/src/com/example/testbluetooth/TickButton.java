@@ -60,6 +60,11 @@ public class TickButton extends View {
 		}
 	}
 	
+	public void printDebug(){
+		int i = 0;
+		i += 1;
+	}
+	
 	private int pW=0;
 	private int pH=0;
 	private RectF bounds=null;
@@ -76,7 +81,7 @@ public class TickButton extends View {
 		this.minW = Math.min(this.minW, this.pW);
 		this.minH = Math.min(this.minH, this.pH);
 		
-		this.bounds=new RectF(0,0,this.pW,this.pH);
+		this.bounds=new RectF(0,0,10,10);
 	}
 	private int minW;
 	private int maxW;
