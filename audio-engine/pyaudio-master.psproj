@@ -56,7 +56,7 @@ ClassName=TProjectRunConfiguationNode
 Name=Untitled
 
 [Project\ChildNodes\Node1\ChildNodes\Node0\RunConfig]
-ScriptName=C:\Users\Christophe\Documents\Python\pyaudio-master\main.py
+ScriptName=C:\Users\Christophe\Documents\GitHub\totofBeats\audio-engine\main.py
 Description=main
 EngineType=peRemote
 ReinitializeBeforeRun=TRUE

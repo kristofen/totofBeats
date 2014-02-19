@@ -55,7 +55,7 @@ def main():
 ##
 ##    return
 
-    g = Generator(Mixer.sRate,Mixer.nbChannel,3)
+    g = Generator(Mixer.sRate,Mixer.nbChannel,8)
 
     Mixer.registerGenerator(g)
 

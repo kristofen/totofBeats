@@ -21,7 +21,7 @@ class Mixer(object):
     nbChannel = 2   # nb canaux
     p = None            # PyAudio instance
     stream = None       # PyAudio stream
-    generator = None
+    gen = None
 
 
     @staticmethod
@@ -42,15 +42,16 @@ class Mixer(object):
 
     @staticmethod
     def registerGenerator(generator):
-        Mixer.generator = generator
+        Mixer.gen = generator
 
     @staticmethod
     def NeedSamples(nb,time):
         #ask tracks nb samples
         # and mix it
-        if (Mixer.generator is not None):
-            tmp = Mixer.generator.needSamples(nb,time)
-        else:
+        tmp = None
+        if (Mixer.gen is not None):
+            tmp = Mixer.gen.needSamples(nb,time)
+        if tmp is None:
             if Mixer.nbChannel>1:
                 tmp = np.zeros(nb*2,dtype=np.float32).reshape((nb,2))
             else:

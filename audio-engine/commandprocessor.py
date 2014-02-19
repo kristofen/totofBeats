@@ -60,6 +60,16 @@ class CommandProcessor(object):
             response = self.cmdCorePause(cmdValue)
         elif cmdKey=='corecue':
             response = self.cmdCoreCue(cmdValue)
+        elif cmdKey=='gridwidth':
+            response = self.cmdGridWidth(cmdValue)
+        elif cmdKey=='gridheight':
+            response = self.cmdGridHeight(cmdValue)
+        elif cmdKey=='gridaddrow':
+            response = self.cmdGridAddRow(cmdValue)
+        elif cmdKey=='gridrow':
+            response = self.cmdGridRow(cmdValue)
+        elif cmdKey=='gridcell':
+            response = self.cmdGridCell(cmdValue)
 
         self.btc.sendCommand(response)
 
@@ -110,8 +120,8 @@ class CommandProcessor(object):
         # enable/disable one tick (arg=indexrow,indextick,tick_state)
         # with tickstate 1=> tick activated
         #                0=> tick disabled
-        f=args.split(',') # indexrow, indextick, value on or off
-        self.generator.gridCell(int(f[0]),int(f[1]),bool(f[2]))
+        f=arg.split(',') # indexrow, indextick, value on or off
+        self.generator.gridCell(int(f[0]),int(f[1]),bool(int(f[2])))
         return "ok"
 
 

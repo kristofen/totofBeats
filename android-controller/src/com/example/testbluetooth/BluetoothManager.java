@@ -16,6 +16,8 @@ public class BluetoothManager {
 		return this.mIsClientUp;
 	}
 	
+	private BluetoothClient client=null;
+	
 /** CONSTRUCTOR **/	
 	public BluetoothManager(){
 		getAdapter();
@@ -68,29 +70,38 @@ public class BluetoothManager {
 	public void startClient(){
 		// if client already up no need to start it
 		if (this.isClientUp()) { return ;}
-		/*this.mgr.listPairedDevices(); 
-		BluetoothDevice d = this.mgr.getDevice();
+		if (!this.isSupported()) { return ;}
+		
+		//this.mgr.listPairedDevices(); 
+		BluetoothDevice d = this.getDevice();
 		if (d!=null) {
 			Log.w("testBluetooth","device not null, will create and start thread");
-			this.cThread = new ClientThread(d,this.mgr.adap);	
-			this.cThread.start();
-		}*/
+			this.client = new BluetoothClient(d,this.mAdapter);	
+			this.client.start();
+			this.mIsClientUp=true;
+		} else {
+			Log.w("testBluetooth","Failed to get default device. Client not started.");
+		}
 		
 	}
 	
 	public void stopClient(){
 		// if client already stopped no need to stop it
 		if (!this.isClientUp()) { return; }
-       /* // The activity is about to be destroyed.
-        if (this.cThread != null) {
-        	this.cThread.cancel();
-        	this.cThread  = null;
-        }  */
+        // The activity is about to be destroyed.
+        if (this.client != null) {
+        	this.client.cancel();
+        	this.client  = null;
+        	this.mIsClientUp=false;
+        }  
 	}
 	
 	public void sendString(String msg){
 		if (!this.isClientUp()){
 			this.startClient();
+		}
+		if (this.client!=null){
+			this.client.send(msg);
 		}
 		/*try{
 			this.cThread.l.lock();

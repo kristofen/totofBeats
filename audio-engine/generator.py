@@ -15,6 +15,7 @@ from waveloader import *
 from library import *
 import math
 import thread
+import threading
 
 # Generator: container for audio tracks to play
 class Generator(object):
@@ -26,17 +27,31 @@ class Generator(object):
     def __init__(self,sampleRate,nbChannels,nbTracks):
         # constructor
         self.library = Library('C:\\Users\\Christophe\\Documents\\Drum Samples\\')
-        self.isOn=False
+        self.isOn=True
         self.bpm = 120.
         self.ptr=int(0)
-        self.ptrLock = thread.allocate_lock
+        self.ptrLock = threading.Lock()
         self.nbticks = 16 # number of ticks
         self.ticksperbeat = 4 # number of ticks per beat
         self.sampleRate = sampleRate # sample frequency
         self.nbChannels = nbChannels # nb output channel to generate
         self.tracks = [] # allocates array of tracks
         for i in range(nbTracks):
-            self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,None,i)) # allocates each track individually
+            wl=None
+            if i==0:
+                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Bassdrum-01.wav')
+                wl.open()
+            elif i==1:
+                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
+                wl.open()
+            elif i==2:
+                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Hat Closed.wav')
+                wl.open()
+
+            if wl is not None:
+                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,wl,i)) # allocates each track individually
+            else:
+                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,None,i)) # allocates each track individually
 
 ##        for i in range(nbTracks):
 ##            wl = None
@@ -85,11 +100,14 @@ class Generator(object):
             outp = outp/nb
 
         # UPDATE read ptr (must lock for eventual updates)
-        with self.ptrLock:
+        try:
+            self.ptrLock.acquire()
             if(self.ptr+nbsamples)>self.bufferdepth:
                 self.ptr = nbsamples-(self.bufferdepth-self.ptr) # updates pointer
             else:
                 self.ptr += nbsamples
+        finally:
+            self.ptrLock.release()
 
         return outp
 
@@ -160,6 +178,10 @@ class Generator(object):
         if indexTrack>=0 and indexTrack<len(self.tracks):
             self.tracks[indexTrack].changeTick(indexTick,tickState)
 
+
+###========================================================================
+###
+
 class GeneratorTrack(object):
     """GeneratorTrack"""
 #Generatortrack:
@@ -218,6 +240,10 @@ class GeneratorTrack(object):
         #set value of a tick of the track
         #value must be bool
         self.ticks[index]=value
+        print self.ticks
+        self.allocateBuffer()
+        self.refreshTrack()
+        self.updateMaster()
 
     @staticmethod
     def getBufferDepth(pNbTicks,pTpb,pBpm,pSRate):
@@ -258,7 +284,7 @@ class GeneratorTrack(object):
     def updateMaster(self):
         # copies work buffer in the master track
 ##        print "i=",self.i," update master with min=",np.min(self.buffer)," max=",np.max(self.buffer)
-        self.master=self.buffer
+        self.master=np.copy(self.buffer)
 
 
     def needSample(self,nbsamples,ptr):

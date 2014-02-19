@@ -20,27 +20,26 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-public class ClientThread extends Thread {
+public class BluetoothClient extends Thread {
 	
 	//private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	//94f39d29-7d6d-437d-973b-fba39e49d4ee
-	private static final UUID MY_UUID = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
+	//private static final UUID MY_UUID = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
 	private final BluetoothSocket mmSocket;
-	private final BluetoothDevice mmDevice;
-	private final BluetoothAdapter mmAdap;
+	//private final BluetoothDevice mmDevice;
+	//private final BluetoothAdapter mmAdap;
 	
 	protected Lock l = new ReentrantLock();
 	protected List<String> msgs = null;
 	
 	@SuppressLint("NewApi")
-	public ClientThread(BluetoothDevice device,BluetoothAdapter adap) {
-		 	Log.w("testBluetooth","thread new");
+	public BluetoothClient(BluetoothDevice device,BluetoothAdapter adap) {
 		 	this.msgs = new ArrayList<String>(10);
 	        // Use a temporary object that is later assigned to mmSocket,
 	        // because mmSocket is final
 	        BluetoothSocket tmp = null;
-	        mmDevice = device;
-	        mmAdap = adap;
+	       // mmDevice = device;
+	        //mmAdap = adap;
 	        // Get a BluetoothSocket to connect with the given BluetoothDevice
 	        try {
 	            // MY_UUID is the app's UUID string, also used by the server code
@@ -115,7 +114,7 @@ public class ClientThread extends Thread {
 			     } finally {
 				       this.l.unlock(); // unlock msg stack
 			     }				 
-			 	Thread.sleep(500);
+			 	Thread.sleep(50);
 			 }
 		 } catch (Exception e) {
 			 Log.w("testBluetooth","Exception:"+e.getMessage());
@@ -133,4 +132,14 @@ public class ClientThread extends Thread {
 	        } catch (IOException e) { }
 	    }
 	
+	 public void send(String s){
+		 this.l.lock();  // block until condition holds
+		 try {
+			 Log.w("testBluetooth","must send command="+s);
+			 this.msgs.add(s);
+		 } finally {
+		       this.l.unlock(); // unlock msg stack
+	     }	
+	 }
+	 
 }

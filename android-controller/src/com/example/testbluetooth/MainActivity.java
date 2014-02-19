@@ -21,13 +21,27 @@ import android.support.v4.app.NavUtils;
 public class MainActivity extends Activity {
 	
 /* Properties */
-    private boolean isStart=false;
+	/** IsStart **/
+    private boolean mIsStart=false;
+    public boolean getIsStart(){
+    	return this.mIsStart;
+    }
     private GridLayout baseGrid = null;
     static final int REQUEST_ENABLE_BT = 1;
 	//private btManager mgr = null;
     //private ClientThread cThread = null; 
-    private BluetoothManager btManager=null;
     
+    /** Bluetooth Manager **/ 
+    private BluetoothManager btManager=null;
+    public BluetoothManager getBtManager(){
+    	return this.btManager;
+    }
+    
+    /** CommandProcessor **/
+    private CommandProcessor cmdProcessor=null; 
+    public CommandProcessor getCmdProcessor(){
+    	return this.cmdProcessor;
+    }
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,6 +50,7 @@ public class MainActivity extends Activity {
         this.baseGrid = (GridLayout) findViewById(R.id.grid1);
         createGrid();
         btManager = new BluetoothManager();
+        cmdProcessor = new CommandProcessor(btManager);
     }
 
     @Override
@@ -44,6 +59,7 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    /** CREATE GRID **/
     private void createGrid(){
     	// add play button
     	LinearLayout lin = (LinearLayout) findViewById(R.id.linLayout1);
@@ -55,10 +71,16 @@ public class MainActivity extends Activity {
 	            {
 	        		Button btn = (Button) v;
 	        		MainActivity context = (MainActivity)btn.getContext();
-	        		if (context.isStart==true){
-	        			
+	        		if (context.mIsStart==true){
+	        			// STOP AUDIO ENGINE
+	        			btn.setText("Start");
+	        			context.mIsStart=false;
+	        			context.cmdProcessor.cmdStopEngine();
 	        		} else {
-	        			
+	        			// START AUDIO ENGINE
+	        			btn.setText("Stop");
+	        			context.mIsStart=true;
+	        			context.cmdProcessor.cmdStartEngine();
 	        		}
 	
 	            }
@@ -70,7 +92,10 @@ public class MainActivity extends Activity {
     	for (int i=0;i<8;i++){
     		for (int j=0;j<16;j++){
 	    		
-    			Button newbtn = new Button(this); // using standard buttons because i'm not able to do a decent custom tickbutton
+    			TickButtonTemp newbtn = new TickButtonTemp(this); // using standard buttons because i'm not able to do a decent custom tickbutton
+    			newbtn.trackIndex=i;
+    			newbtn.tickIndex=j;
+    			newbtn.setOnClickListener(new TickButtonClick());
     			//TickButton newbtn = new TickButton(this);
 	    		//newbtn.setText("a"+i+"_"+j);
 	    		newbtn.setId(((i+1)*100)+j); // ids from 100 to 816 (xyy with x=track index+1 and y=tick nb)

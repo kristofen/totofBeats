@@ -43,7 +43,10 @@ class BluetoothClient(object):
             btc.isActive=True
             while (btc.mustStop==0):
                 data = btc.sock.recv(1024)
-                mustExit = btc.commandProcessor.bufferize(data)
+                if len(data)==0:
+                    mustExit=True
+                else:
+                    mustExit = btc.commandProcessor.bufferize(data)
                 if mustExit:
                     btc.mustStop=1
 
