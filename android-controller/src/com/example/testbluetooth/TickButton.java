@@ -11,8 +11,11 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 
-public class TickButton extends View {
+public class TickButton extends Button {
 
+	public int trackIndex=-1;
+	public int tickIndex=-1;
+	
 	public TickButton(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
@@ -60,10 +63,6 @@ public class TickButton extends View {
 		}
 	}
 	
-	public void printDebug(){
-		int i = 0;
-		i += 1;
-	}
 	
 	private int pW=0;
 	private int pH=0;
@@ -81,7 +80,7 @@ public class TickButton extends View {
 		this.minW = Math.min(this.minW, this.pW);
 		this.minH = Math.min(this.minH, this.pH);
 		
-		this.bounds=new RectF(0,0,10,10);
+		this.bounds=new RectF(2,2,this.pW-4,this.pH-4);
 	}
 	private int minW;
 	private int maxW;
@@ -92,6 +91,13 @@ public class TickButton extends View {
 		if (this.bounds!=null && this.backPaint!=null){
 			canvas.drawRect(this.bounds, backPaint);	
 		}
+	}
+	public void toggle() {
+		// TODO Auto-generated method stub
+		this.pIsOn = ! this.pIsOn; 
+		refreshColor();
+		invalidate();
+		requestLayout();
 	}
 	
 	

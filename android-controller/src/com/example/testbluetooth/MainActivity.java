@@ -92,7 +92,8 @@ public class MainActivity extends Activity {
     	for (int i=0;i<8;i++){
     		for (int j=0;j<16;j++){
 	    		
-    			TickButtonTemp newbtn = new TickButtonTemp(this); // using standard buttons because i'm not able to do a decent custom tickbutton
+    			//TickButtonTemp newbtn = new TickButtonTemp(this); // using standard buttons because i'm not able to do a decent custom tickbutton
+    			TickButton newbtn = new TickButton(this); // using standard buttons because i'm not able to do a decent custom tickbutton
     			newbtn.trackIndex=i;
     			newbtn.tickIndex=j;
     			newbtn.setOnClickListener(new TickButtonClick());
