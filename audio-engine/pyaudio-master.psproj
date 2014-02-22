@@ -27,26 +27,30 @@ FileName=$[Project-Path]generator.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node4]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]library.py
+FileName=$[Project-Path]generatortrack.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node5]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]main.py
+FileName=$[Project-Path]library.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node6]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]mixer.py
+FileName=$[Project-Path]main.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node7]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]testapplyfilter.py
+FileName=$[Project-Path]mixer.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node8]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]testapplyfilter.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node9]
 ClassName=TProjectFileNode
 FileName=$[Project-Path]waveloader.py
 
 [Project\ChildNodes\Node0\ChildNodes]
-Count=9
+Count=10
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode
