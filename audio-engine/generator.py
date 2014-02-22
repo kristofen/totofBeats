@@ -25,9 +25,9 @@ class Generator(object):
     trace=False # for debug
     counter=0   # for debug
 
-    def __init__(self,sampleRate,nbChannels,nbTracks):
+    def __init__(self,sampleRate,nbChannels,confMan):
         # constructor
-        self.library = Library('C:\\Users\\Christophe\\Documents\\Drum Samples\\')
+        self.library = Library(confMan.conf['library'])
         self.isOn=True
         self.bpm = 120.
         self.ptr=int(0)
@@ -37,22 +37,20 @@ class Generator(object):
         self.sampleRate = sampleRate # sample frequency
         self.nbChannels = nbChannels # nb output channel to generate
         self.tracks = [] # allocates array of tracks
-        for i in range(nbTracks):
+        self.confMan=confMan
+        kit=confMan.conf['kits'][0]
+        for i in range(len(kit['tracks'])):
             wl=None
-            if i==0:
-                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Bassdrum-01.wav')
-                wl.open()
-            elif i==1:
-                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Snaredrum.wav')
-                wl.open()
-            elif i==2:
-                wl=WaveLoader('C:\\Users\\Christophe\\Documents\\Drum Samples\\Roland TR-808\\Hat Closed.wav')
+            trk=kit['tracks'][i]
+            if trk['file']!="":
+                print trk['file']
+                wl=WaveLoader(self.library.getPath(trk['file']))
                 wl.open()
 
             if wl is not None:
-                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,wl,i)) # allocates each track individually
+                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,wl,i,trk['name'],float(trk['gain']))) # allocates each track individually
             else:
-                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,None,i)) # allocates each track individually
+                self.tracks.append(GeneratorTrack(self.nbticks,self.ticksperbeat,self.bpm,None,i,trk['name'],float(trk['gain']))) # allocates each track individually
 
 ##        for i in range(nbTracks):
 ##            wl = None

@@ -18,16 +18,16 @@ from mixer import *
 from bluetoothserver import *
 from bluetoothclient import *
 from commandprocessor import *
+from configurationmanager import *
 import matplotlib.pylab as plt
 
-def main():
+def main(file):
 
 ##    wl = WaveLoader('signal400.wav')
 ##    wl.open()
 ##    test = TestApplyfilter(wl)
 ##    test.applyFilter2()
 
-    print "main"
 
 ##    buff=None
 ##    nb=44100*2*4
@@ -55,7 +55,14 @@ def main():
 ##
 ##    return
 
-    g = Generator(Mixer.sRate,Mixer.nbChannel,8)
+    confMan = ConfigurationManager(file)
+    confMan.load()
+
+    for trk in confMan.conf['kits'][0]['tracks']:
+        print trk['file']
+
+
+    g = Generator(Mixer.sRate,Mixer.nbChannel,confMan)
 
     Mixer.registerGenerator(g)
 
@@ -87,4 +94,10 @@ def main():
     pass
 
 if __name__ == '__main__':
-    main()
+
+    if len(sys.argv) < 2:
+        print "USAGE: main conffile"
+    else:
+        print "conffile=",sys.argv[1]
+        main(sys.argv[1])
+

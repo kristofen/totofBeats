@@ -10,7 +10,9 @@ class GeneratorTrack(object):
     """GeneratorTrack"""
 #Generatortrack:
 
-    def __init__(self,nbticks,ticksperbeat,bpm,wl,i):
+    def __init__(self,nbticks,ticksperbeat,bpm,wl,i,label,gain):
+        self.label=label
+        self.gain=gain
         self.nbticks = nbticks  # total ticks on the track
         self.ticksperbeat=ticksperbeat # nb ticks per beat (<== not used ?)
         self.allocateTicks() # allocates ticks array
@@ -100,10 +102,11 @@ class GeneratorTrack(object):
             for i in indexes:
                 # gets pointer of current ticks in sample unit
                 ptr=math.floor(i*(self.bufferdepth/self.nbticks)) # index*nb samples per ticks
-                len2move=min(self.buffer.shape[0]-ptr,self.wl.nbSamples) # length of wave file to move (crop if longer than remaining buffer)
+                wlNbSample=min(self.buffer.shape[0],self.wl.nbSamples) # if wave is longer than grid then takes only grid length
+                len2move=min(self.buffer.shape[0]-ptr,wlNbSample) # length of wave file to move (crop if longer than remaining buffer)
                 self.buffer[ptr:ptr+len2move,:]+=self.wl.data[0:len2move,:] # move it
-                if self.wl.nbSamples>len2move: # if wave file is longer than  len moved then we move remaining wave samples at the beginning of buffer
-                    self.buffer[0:self.wl.nbSamples-len2move,:]+=self.wl.data[len2move:,:]
+                if wlNbSample>len2move: # if wave file is longer than  len moved then we move remaining wave samples at the beginning of buffer
+                    self.buffer[0:wlNbSample-len2move,:]+=self.wl.data[len2move:wlNbSample,:]
 
     def updateMaster(self):
         # copies work buffer in the master track
